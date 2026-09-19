@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { fetchAppointments } from "@/app/api/appointments";
 import { fetchPets } from "@/app/api/pets";
 
@@ -132,7 +133,9 @@ export default function AppointmentsCalendar() {
                   </td>
 
                   <td className="p-3 font-medium text-gray-900">
-                    {petName}
+                    <Link href={`/pets/${a.pet_id}`} className="hover:text-blue-600 underline decoration-blue-300">
+                      {petName}
+                    </Link>
                   </td>
 
                   <td className="p-3">
