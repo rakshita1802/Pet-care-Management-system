@@ -49,6 +49,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from fastapi.staticfiles import StaticFiles
+import os
+
+# Create uploads dir if it doesn't exist
+os.makedirs("uploads", exist_ok=True)
+
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
+from app.routers import emr as emr_router
+
 app.include_router(owners_router.router)
 app.include_router(pets_router.router)
 app.include_router(appt_router.router)
@@ -56,3 +66,4 @@ app.include_router(vacc_router.router)
 app.include_router(auth_router.router)
 app.include_router(notifications_router.router)
 app.include_router(billing_router.router)
+app.include_router(emr_router.router)

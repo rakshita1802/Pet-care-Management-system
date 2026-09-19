@@ -5,6 +5,7 @@ import { fetchPetById } from "@/app/api/pets";
 import { fetchOwnerById } from "@/app/api/owners";
 import { fetchAppointments } from "@/app/api/appointments";
 import { fetchVaccinationsByPet } from "@/app/api/vaccinations";
+import EMRDashboard from "./EMRDashboard";
 
 export default function PetDetail({ petId }) {
   const [pet, setPet] = useState(null);
@@ -44,6 +45,8 @@ export default function PetDetail({ petId }) {
     loadData();
   }, [petId]);
 
+  const [activeTab, setActiveTab] = useState("overview");
+
   if (loading) {
     return <p className="text-gray-500">Loading pet details…</p>;
   }
@@ -77,105 +80,129 @@ export default function PetDetail({ petId }) {
   return (
     <div className="space-y-8">
       {/* PET HEADER */}
-      <div className="bg-white rounded-2xl shadow border p-6">
-        <h1 className="text-3xl font-extrabold text-gray-900">
-          🐾 {pet.name}
-        </h1>
-        <p className="text-gray-500 mt-1">
-          {pet.species} • {pet.breed} • {pet.age_months} months
-        </p>
-      </div>
-
-      {/* OWNER CARD */}
-      <div className="bg-indigo-50 rounded-2xl border border-indigo-200 p-6">
-        <h2 className="text-lg font-bold text-indigo-900 mb-2">
-          Owner
-        </h2>
-        <p className="text-gray-800 font-medium">
-          {owner.name}
-        </p>
-        <p className="text-gray-600">
-          📞 <a href={`tel:${owner.phone}`} className="underline">
-            {owner.phone}
-          </a>
-        </p>
-      </div>
-
-      {/* APPOINTMENT HISTORY */}
-      <div className="bg-white rounded-2xl shadow border p-6">
-        <h2 className="text-lg font-bold mb-4">
-          Recent Appointments
-        </h2>
-
-        {lastAppointments.length === 0 ? (
-          <p className="text-gray-500 text-sm">
-            No completed or cancelled appointments
+      <div className="bg-white rounded-2xl shadow border p-6 flex justify-between items-end">
+        <div>
+          <h1 className="text-3xl font-extrabold text-gray-900">
+            🐾 {pet.name}
+          </h1>
+          <p className="text-gray-500 mt-1">
+            {pet.species} • {pet.breed} • {pet.age_months} months
           </p>
-        ) : (
-          <ul className="space-y-3">
-            {lastAppointments.map((a) => (
-              <li
-                key={a.id}
-                className="flex justify-between items-center border rounded-lg p-3"
-              >
-                <div>
-                  <p className="font-medium text-gray-900">
-                    {a.appointment_type}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {new Date(
-                      a.appointment_date
-                    ).toLocaleDateString()}
-                  </p>
-                </div>
-
-                <span
-                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                    a.status === "Completed"
-                      ? "bg-green-100 text-green-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {a.status}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
+        </div>
+        
+        {/* TABS */}
+        <div className="flex gap-2 bg-gray-100 p-1 rounded-xl">
+          <button 
+            onClick={() => setActiveTab("overview")}
+            className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${activeTab === 'overview' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Overview
+          </button>
+          <button 
+            onClick={() => setActiveTab("emr")}
+            className={`px-6 py-2 rounded-lg font-bold text-sm transition-all ${activeTab === 'emr' ? 'bg-white shadow text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
+          >
+            Medical Records
+          </button>
+        </div>
       </div>
 
-      {/* VACCINATION */}
-      <div className="bg-white rounded-2xl shadow border p-6">
-        <h2 className="text-lg font-bold mb-4">
-          Vaccination Status
-        </h2>
-
-        {lastVaccination ? (
-          <div className="space-y-2">
-            <p className="text-gray-800">
-              <strong>Last:</strong>{" "}
-              {lastVaccination.vaccine_name} (
-              {lastVaccination.administered_date})
+      {activeTab === "overview" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* OWNER CARD */}
+          <div className="bg-indigo-50 rounded-2xl border border-indigo-200 p-6 md:col-span-2">
+            <h2 className="text-lg font-bold text-indigo-900 mb-2">
+              Owner
+            </h2>
+            <p className="text-gray-800 font-medium">
+              {owner.name}
             </p>
+            <p className="text-gray-600">
+              📞 <a href={`tel:${owner.phone}`} className="underline">
+                {owner.phone}
+              </a>
+            </p>
+          </div>
 
-            {nextDueVaccination ? (
-              <p className="text-red-600 font-semibold">
-                Next Due:{" "}
-                {nextDueVaccination.vaccine_name} on{" "}
-                {nextDueVaccination.next_due_date}
+          {/* APPOINTMENT HISTORY */}
+          <div className="bg-white rounded-2xl shadow border p-6">
+            <h2 className="text-lg font-bold mb-4">
+              Recent Appointments
+            </h2>
+
+            {lastAppointments.length === 0 ? (
+              <p className="text-gray-500 text-sm">
+                No completed or cancelled appointments
               </p>
             ) : (
-              <p className="text-green-600 font-medium">
-                No upcoming vaccinations
+              <ul className="space-y-3">
+                {lastAppointments.map((a) => (
+                  <li
+                    key={a.id}
+                    className="flex justify-between items-center border rounded-lg p-3"
+                  >
+                    <div>
+                      <p className="font-medium text-gray-900">
+                        {a.appointment_type}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(
+                          a.appointment_date
+                        ).toLocaleDateString()}
+                      </p>
+                    </div>
+
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        a.status === "Completed"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }`}
+                    >
+                      {a.status}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          {/* VACCINATION */}
+          <div className="bg-white rounded-2xl shadow border p-6">
+            <h2 className="text-lg font-bold mb-4">
+              Vaccination Status
+            </h2>
+
+            {lastVaccination ? (
+              <div className="space-y-2">
+                <p className="text-gray-800">
+                  <strong>Last:</strong>{" "}
+                  {lastVaccination.vaccine_name} (
+                  {lastVaccination.administered_date})
+                </p>
+
+                {nextDueVaccination ? (
+                  <p className="text-red-600 font-semibold">
+                    Next Due:{" "}
+                    {nextDueVaccination.vaccine_name} on{" "}
+                    {nextDueVaccination.next_due_date}
+                  </p>
+                ) : (
+                  <p className="text-green-600 font-medium">
+                    No upcoming vaccinations
+                  </p>
+                )}
+              </div>
+            ) : (
+              <p className="text-gray-500">
+                No vaccination records
               </p>
             )}
           </div>
-        ) : (
-          <p className="text-gray-500">
-            No vaccination records
-          </p>
-        )}
-      </div>
+        </div>
+      ) : (
+        <EMRDashboard petId={petId} />
+      )}
     </div>
   );
 }

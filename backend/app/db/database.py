@@ -34,6 +34,8 @@ from app.models.owners import Owner
 from app.models.pets import Pet
 from app.models.appointments import Appointment
 from app.models.vaccination import Vaccination
+from app.models.billing import Invoice, InvoiceItem, Payment
+from app.models.emr import MedicalRecord, Attachment
 
 Base.metadata.create_all(bind=engine)
 
