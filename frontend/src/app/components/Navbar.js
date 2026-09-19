@@ -13,6 +13,7 @@ export default function Navbar() {
     { name: "My Pets", href: "/pets" },
     { name: "Appointments", href: "/appointments" },
     { name: "Vaccinations", href: "/vaccinations" },
+    { name: "Billing", href: "/billing" },
   ];
 
   return (

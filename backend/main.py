@@ -6,6 +6,7 @@ from app.models.pets import Pet
 from app.models.appointments import Appointment
 from app.models.vaccination import Vaccination
 from app.models.users import User
+from app.models.billing import Invoice, InvoiceItem, Payment
 
 Base.metadata.create_all(bind=engine)
 
@@ -15,6 +16,7 @@ from app.routers import appointments as appt_router
 from app.routers import vaccination as vacc_router
 from app.routers import auth as auth_router
 from app.routers import notifications as notifications_router
+from app.routers import billing as billing_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -53,3 +55,4 @@ app.include_router(appt_router.router)
 app.include_router(vacc_router.router)
 app.include_router(auth_router.router)
 app.include_router(notifications_router.router)
+app.include_router(billing_router.router)
