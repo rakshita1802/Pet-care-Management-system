@@ -14,6 +14,7 @@ from app.routers import pets as pets_router
 from app.routers import appointments as appt_router
 from app.routers import vaccination as vacc_router
 from app.routers import auth as auth_router
+from app.routers import notifications as notifications_router
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -51,4 +52,4 @@ app.include_router(pets_router.router)
 app.include_router(appt_router.router)
 app.include_router(vacc_router.router)
 app.include_router(auth_router.router)
-
+app.include_router(notifications_router.router)
