@@ -164,7 +164,7 @@ export default function EMRDashboard({ petId }) {
 
           <div className="space-y-3">
             <div>
-              <label className="block text-xs font-semibold mb-1">Subjective (Owner's report)</label>
+              <label className="block text-xs font-semibold mb-1">Subjective (Owner&apos;s report)</label>
               <textarea className="w-full p-2 rounded-lg border border-blue-200 h-20" value={newRecord.subjective} onChange={e => setNewRecord({...newRecord, subjective: e.target.value})}></textarea>
             </div>
             <div>

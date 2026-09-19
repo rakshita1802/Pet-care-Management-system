@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";
 
@@ -10,6 +10,12 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+
+  const logout = useCallback(() => {
+    localStorage.removeItem("access_token");
+    setUser(null);
+    router.push("/login");
+  }, [router]);
 
   useEffect(() => {
     // Check token on initial load
@@ -28,19 +34,13 @@ export function AuthProvider({ children }) {
       }
     }
     setLoading(false);
-  }, []);
+  }, [logout]);
 
   const login = (token) => {
     localStorage.setItem("access_token", token);
     const decoded = jwtDecode(token);
     setUser({ email: decoded.sub, role: decoded.role, owner_id: decoded.owner_id });
     router.push("/");
-  };
-
-  const logout = () => {
-    localStorage.removeItem("access_token");
-    setUser(null);
-    router.push("/login");
   };
 
   return (
