@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { fetchInvoices, createInvoice, payInvoice } from "@/app/api/billing";
+import { fetchInvoices, createInvoice, createCheckoutSession } from "@/app/api/billing";
 import { fetchOwners } from "@/app/api/owners";
 
 export default function BillingPage() {
@@ -21,6 +21,18 @@ export default function BillingPage() {
 
   useEffect(() => {
     if (authLoading || !user) return;
+    
+    const query = new URLSearchParams(window.location.search);
+    if (query.get("success")) {
+      alert("Payment successful! Your invoice is now marked as Paid.");
+      // Clean up URL
+      window.history.replaceState(null, "", "/billing");
+    }
+    if (query.get("canceled")) {
+      alert("Payment was canceled.");
+      window.history.replaceState(null, "", "/billing");
+    }
+
     loadData();
   }, [user, authLoading]);
 
@@ -70,15 +82,10 @@ export default function BillingPage() {
   const handlePay = async (invoiceId, amount) => {
     setPayingInvoiceId(invoiceId);
     try {
-      await payInvoice(invoiceId, {
-        amount_paid: amount,
-        payment_method: "Credit Card (Simulated)"
-      });
-      alert("Payment successful!");
-      loadData();
+      const { url } = await createCheckoutSession(invoiceId);
+      window.location.href = url; // Redirect to Stripe
     } catch (err) {
       alert(err.message || "Payment failed");
-    } finally {
       setPayingInvoiceId(null);
     }
   };
@@ -241,7 +248,7 @@ export default function BillingPage() {
                       onClick={() => handlePay(invoice.id, invoice.total_amount)}
                       className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-full font-bold shadow-md transition-all disabled:opacity-50"
                     >
-                      {payingInvoiceId === invoice.id ? "Processing..." : "Pay Now (Simulated)"}
+                      {payingInvoiceId === invoice.id ? "Processing..." : "Pay Now"}
                     </button>
                   )}
                 </div>

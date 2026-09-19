@@ -29,3 +29,11 @@ export async function payInvoice(id, paymentData) {
   if (!res.ok) throw new Error("Failed to process payment");
   return res.json();
 }
+
+export async function createCheckoutSession(id) {
+  const res = await fetchAuth(`/invoices/${id}/create-checkout-session`, {
+    method: "POST"
+  });
+  if (!res.ok) throw new Error("Failed to create checkout session");
+  return res.json();
+}
