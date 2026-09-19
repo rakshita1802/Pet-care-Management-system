@@ -93,6 +93,7 @@ export default function AppointmentForm({ defaultPetId }) {
             name="appointment_date"
             value={form.appointment_date}
             onChange={handleChange}
+            min={new Date().toISOString().split("T")[0]}
             required
             className="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-400"
           />

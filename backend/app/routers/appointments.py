@@ -24,6 +24,9 @@ def schedule_appointment(
     if not pet:
         raise HTTPException(status_code=404, detail="Pet not found")
 
+    if appt.appointment_date < date.today():
+        raise HTTPException(status_code=400, detail="Cannot schedule an appointment in the past")
+
     new_appt = Appointment(
         pet_id=appt.pet_id,
         owner_id=pet.owner_id,
