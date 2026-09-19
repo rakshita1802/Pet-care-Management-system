@@ -35,3 +35,12 @@ export async function updatePetStatus(id, health_status) {
   if (!res.ok) throw new Error("Failed to update status");
   return res.json();
 }
+
+export async function updatePet(id, petData) {
+  const res = await fetchAuth(`/pets/${id}`, {
+    method: "PUT",
+    body: JSON.stringify(petData),
+  });
+  if (!res.ok) throw new Error("Failed to update pet");
+  return res.json();
+}
