@@ -44,13 +44,13 @@ function LandingPage() {
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link 
-              href="/auth/login" 
+              href="/login" 
               className="w-full sm:w-auto px-8 py-4 bg-gray-900 text-white rounded-full font-bold text-lg hover:bg-gray-800 hover:scale-105 transition-all shadow-lg hover:shadow-xl"
             >
               Sign In
             </Link>
             <Link 
-              href="/auth/register" 
+              href="/register" 
               className="w-full sm:w-auto px-8 py-4 bg-white text-gray-900 rounded-full font-bold text-lg hover:bg-gray-50 border-2 border-gray-200 hover:border-gray-900 hover:scale-105 transition-all shadow-sm"
             >
               Create Account
