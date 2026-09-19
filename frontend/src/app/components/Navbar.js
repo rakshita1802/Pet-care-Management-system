@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
   const navLinks = [
-    { name: "Owners", href: "/owners" },
-    { name: "Pets", href: "/pets" },
+    ...(user?.role === "staff" ? [{ name: "Owners", href: "/owners" }] : []),
+    { name: "My Pets", href: "/pets" },
     { name: "Appointments", href: "/appointments" },
     { name: "Vaccinations", href: "/vaccinations" },
   ];
@@ -34,28 +36,45 @@ export default function Navbar() {
 
         {/* NAV LINKS */}
         <div className="flex items-center gap-2">
-          {navLinks.map((link) => {
-            const active =
-              pathname === link.href ||
-              pathname.startsWith(link.href + "/");
+          {user ? (
+            <>
+              {navLinks.map((link) => {
+                const active =
+                  pathname === link.href ||
+                  pathname.startsWith(link.href + "/");
 
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`
-                  px-4 py-2 rounded-full text-sm font-medium transition-all
-                  ${
-                    active
-                      ? "bg-yellow-200 text-gray-900 shadow-sm"
-                      : "text-gray-600 hover:bg-yellow-100 hover:text-gray-900"
-                  }
-                `}
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`
+                      px-4 py-2 rounded-full text-sm font-medium transition-all
+                      ${
+                        active
+                          ? "bg-yellow-200 text-gray-900 shadow-sm"
+                          : "text-gray-600 hover:bg-yellow-100 hover:text-gray-900"
+                      }
+                    `}
+                  >
+                    {link.name === "My Pets" && user.role === "staff" ? "Pets" : link.name}
+                  </Link>
+                );
+              })}
+              <button
+                onClick={logout}
+                className="ml-4 px-4 py-2 rounded-full text-sm font-medium text-red-600 hover:bg-red-50 transition-all"
               >
-                {link.name}
-              </Link>
-            );
-          })}
+                Logout
+              </button>
+            </>
+          ) : (
+            <Link
+              href="/login"
+              className="px-4 py-2 rounded-full text-sm font-medium bg-yellow-400 text-gray-900 hover:bg-yellow-500 transition-all shadow-sm"
+            >
+              Sign In
+            </Link>
+          )}
         </div>
       </div>
     </nav>

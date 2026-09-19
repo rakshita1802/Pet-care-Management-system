@@ -1,73 +1,62 @@
-import { BASE_URL } from "./config";
+import { fetchAuth } from "./config";
 
-/* GET ALL OWNERS */
+// Get all owners
 export async function fetchOwners() {
-  const res = await fetch(`${BASE_URL}/owners/`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch owners");
-  }
-
-  const data = await res.json();
-  return Array.isArray(data) ? data : [];
+  const res = await fetchAuth(`/owners/`);
+  if (!res.ok) return [];
+  return res.json();
 }
 
-/* GET OWNER BY ID */
+// Get specific owner by ID
 export async function fetchOwnerById(id) {
-  const res = await fetch(`${BASE_URL}/owners/${id}`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    throw new Error("Owner not found");
-  }
-
-  return await res.json();
+  const res = await fetchAuth(`/owners/${id}`);
+  if (!res.ok) return null;
+  return res.json();
 }
 
-/* CREATE OWNER */
-export async function createOwner(ownerData) {
-  const res = await fetch(`${BASE_URL}/owners/`, {
+// Search owners
+export async function searchOwners(query) {
+  const res = await fetchAuth(`/owners/?search=${query}`);
+  if (!res.ok) return [];
+  return res.json();
+}
+
+// Create new owner
+export async function createOwner(payload) {
+  const res = await fetchAuth(`/owners/`, {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(ownerData),
+    body: JSON.stringify(payload),
   });
-
+  
   if (!res.ok) {
-    throw new Error("Failed to create owner");
+    const errData = await res.json();
+    throw new Error(errData.detail || "Failed to create owner");
   }
-
-  return await res.json();
+  return res.json();
 }
 
-/* UPDATE OWNER */
-export async function updateOwner(ownerId, ownerData) {
-  const res = await fetch(`${BASE_URL}/owners/${ownerId}`, {
+// Update owner
+export async function updateOwner(ownerId, payload) {
+  const res = await fetchAuth(`/owners/${ownerId}`, {
     method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(ownerData),
+    body: JSON.stringify(payload),
   });
-
+  
   if (!res.ok) {
-    throw new Error("Failed to update owner");
+    const errData = await res.json();
+    throw new Error(errData.detail || "Failed to update owner");
   }
-
-  return await res.json();
+  return res.json();
 }
 
-/* DELETE OWNER */
+// Delete owner
 export async function deleteOwner(ownerId) {
-  const res = await fetch(`${BASE_URL}/owners/${ownerId}`, {
+  const res = await fetchAuth(`/owners/${ownerId}`, {
     method: "DELETE",
   });
-
+  
   if (!res.ok) {
     throw new Error("Failed to delete owner");
   }
+  return true;
 }

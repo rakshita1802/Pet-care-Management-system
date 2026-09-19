@@ -6,6 +6,8 @@ from datetime import date
 from app.db.database import get_db
 from app.models.pets import Pet
 from app.models.appointments import Appointment
+from app.models.users import User
+from app.auth.dependencies import get_current_user, get_current_staff_user
 from app.schema.appointments import (
     AppointmentCreate,
     ShowAppointment,
@@ -18,11 +20,15 @@ router = APIRouter(prefix="/appointments", tags=["Appointments"])
 @router.post("/", response_model=ShowAppointment)
 def schedule_appointment(
     appt: AppointmentCreate,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     pet = db.query(Pet).filter(Pet.id == appt.pet_id).first()
     if not pet:
         raise HTTPException(status_code=404, detail="Pet not found")
+
+    if current_user.role == "customer" and pet.owner_id != current_user.owner_id:
+        raise HTTPException(status_code=403, detail="Not authorized to schedule for this pet")
 
     if appt.appointment_date < date.today():
         raise HTTPException(status_code=400, detail="Cannot schedule an appointment in the past")
@@ -49,10 +55,15 @@ def get_appointments(
     status: Optional[str] = None,
     pet_id: Optional[int] = None,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
     today = date.today()
 
-    appointments = db.query(Appointment).all()
+    query = db.query(Appointment)
+    if current_user.role == "customer":
+        query = query.filter(Appointment.owner_id == current_user.owner_id)
+
+    appointments = query.all()
 
     # STATUS CHECK
     updated = False
@@ -95,6 +106,7 @@ def update_appointment_status(
     appointment_id: int,
     update: UpdateAppointmentStatus,
     db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_staff_user) # Only staff can update status manually
 ):
     appt = (
         db.query(Appointment)

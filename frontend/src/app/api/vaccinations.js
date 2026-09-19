@@ -1,43 +1,32 @@
-import { BASE_URL } from "./config";
+import { fetchAuth } from "./config";
 
-/* FETCH ALL */
-
-export async function fetchVaccinations() {
-  const res = await fetch(`${BASE_URL}/vaccinations/`);
-  if (!res.ok) throw new Error("Failed to fetch vaccinations");
+// Record Vaccination
+export async function createVaccination(payload) {
+  const res = await fetchAuth(`/vaccinations/`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) throw new Error("Failed to record vaccination");
   return res.json();
 }
 
-/* FETCH DUE */
-
+// Get Due Vaccinations
 export async function fetchDueVaccinations() {
-  const res = await fetch(`${BASE_URL}/vaccinations/due/`);
+  const res = await fetchAuth(`/vaccinations/due/`);
   if (!res.ok) throw new Error("Failed to fetch due vaccinations");
   return res.json();
 }
 
-/* FETCH BY PET */
-
+// Get all vaccinations for a specific pet
 export async function fetchVaccinationsByPet(petId) {
-  const res = await fetch(`${BASE_URL}/vaccinations/?pet_id=${petId}`);
+  const res = await fetchAuth(`/vaccinations/?pet_id=${petId}`);
   if (!res.ok) throw new Error("Failed to fetch pet vaccinations");
-
-  const data = await res.json();
-  return Array.isArray(data) ? data : data.vaccinations || [];
+  return res.json();
 }
 
-/* CREATE */
-
-export async function createVaccination(payload) {
-  const res = await fetch(`${BASE_URL}/vaccinations/`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  });
-
-  if (!res.ok) {
-    throw new Error("Failed to record vaccination");
-  }
-
+// Get All Vaccinations
+export async function fetchVaccinations() {
+  const res = await fetchAuth(`/vaccinations/`);
+  if (!res.ok) throw new Error("Failed to fetch all vaccinations");
   return res.json();
 }

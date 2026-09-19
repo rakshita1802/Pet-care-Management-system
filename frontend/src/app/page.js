@@ -1,7 +1,11 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { fetchOwners } from "./api/owners";
 import { fetchPets } from "./api/pets";
 import { fetchAppointments } from "./api/appointments";
 import { fetchVaccinations } from "./api/vaccinations";
+import { useAuth } from "@/context/AuthContext";
 
 function getEffectiveStatus(appointment) {
   const today = new Date();
@@ -10,7 +14,6 @@ function getEffectiveStatus(appointment) {
   const apptDate = new Date(appointment.appointment_date);
   apptDate.setHours(0, 0, 0, 0);
 
-
   if (appointment.status === "Cancelled") return "Cancelled";
   if (apptDate < today && appointment.status === "Scheduled")
     return "Completed";
@@ -18,14 +21,55 @@ function getEffectiveStatus(appointment) {
   return appointment.status;
 }
 
-export default async function Dashboard() {
-  const [owners, pets, appointments, vaccinations] =
-    await Promise.all([
-      fetchOwners(),
-      fetchPets(),
-      fetchAppointments(),
-      fetchVaccinations(),
-    ]);
+export default function Dashboard() {
+  const { user, loading: authLoading } = useAuth();
+  
+  const [data, setData] = useState({
+    owners: [],
+    pets: [],
+    appointments: [],
+    vaccinations: [],
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (authLoading || !user) {
+      if (!authLoading) setLoading(false);
+      return;
+    }
+
+    async function loadData() {
+      try {
+        const [o, p, a, v] = await Promise.all([
+          fetchOwners(),
+          fetchPets(),
+          fetchAppointments(),
+          fetchVaccinations(),
+        ]);
+        setData({ owners: o, pets: p, appointments: a, vaccinations: v });
+      } catch (err) {
+        console.error("Failed to load dashboard data", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadData();
+  }, [user, authLoading]);
+
+  if (authLoading || loading) {
+    return <div className="min-h-screen bg-[#f6f4ef] p-8 flex items-center justify-center">Loading dashboard...</div>;
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#f6f4ef] p-8 flex flex-col items-center justify-center">
+        <h1 className="text-3xl font-bold mb-4">Welcome to Happy Paws 🐾</h1>
+        <p className="text-gray-600">Please sign in to view your dashboard.</p>
+      </div>
+    );
+  }
+
+  const { owners, pets, appointments, vaccinations } = data;
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -58,7 +102,6 @@ export default async function Dashboard() {
     )
     .slice(0, 4);
 
-  /*  UI  */
   return (
     <div className="min-h-screen bg-[#f6f4ef] p-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -67,11 +110,10 @@ export default async function Dashboard() {
         <div className="bg-gradient-to-r from-yellow-100 to-amber-200 rounded-3xl p-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-extrabold text-gray-900">
-              Welcome back 🐾
+              Welcome back {user.role === 'customer' ? '🐾' : 'Admin 🐾'}
             </h1>
             <p className="text-gray-700 mt-2 max-w-md">
               Here’s what’s happening at Happy Paws today.
-              Keep pets healthy, owners happy.
             </p>
           </div>
           <div className="hidden md:block text-6xl">🐶🐱</div>
@@ -79,13 +121,15 @@ export default async function Dashboard() {
 
         {/* STATS */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {user.role === 'staff' && (
+            <StatCard
+              title="Total Owners"
+              value={owners.length}
+              accent="bg-yellow-200"
+            />
+          )}
           <StatCard
-            title="Total Owners"
-            value={owners.length}
-            accent="bg-yellow-200"
-          />
-          <StatCard
-            title="Total Pets"
+            title={user.role === 'staff' ? "Total Pets" : "My Pets"}
             value={pets.length}
             accent="bg-orange-200"
           />
@@ -143,25 +187,29 @@ export default async function Dashboard() {
               Recent Activity
             </h2>
 
-            <ul className="space-y-3">
-              {recentAppointments.map((a) => {
-                const pet = pets.find((p) => p.id === a.pet_id);
-                return (
-                  <li
-                    key={a.id}
-                    className="bg-gray-50 rounded-xl p-3"
-                  >
-                    <div className="flex justify-between">
-                      <p className="font-medium">{pet?.name}</p>
-                      <StatusPill status={a.effectiveStatus} />
-                    </div>
-                    <p className="text-xs text-gray-500">
-                      {a.appointment_type}
-                    </p>
-                  </li>
-                );
-              })}
-            </ul>
+            {recentAppointments.length === 0 ? (
+              <p className="text-gray-500 text-sm">No recent activity.</p>
+            ) : (
+              <ul className="space-y-3">
+                {recentAppointments.map((a) => {
+                  const pet = pets.find((p) => p.id === a.pet_id);
+                  return (
+                    <li
+                      key={a.id}
+                      className="bg-gray-50 rounded-xl p-3"
+                    >
+                      <div className="flex justify-between">
+                        <p className="font-medium">{pet?.name}</p>
+                        <StatusPill status={a.effectiveStatus} />
+                      </div>
+                      <p className="text-xs text-gray-500">
+                        {a.appointment_type}
+                      </p>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         </div>
       </div>
