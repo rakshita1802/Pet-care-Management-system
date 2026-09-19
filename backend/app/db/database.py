@@ -4,7 +4,9 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.engine import Engine
 import sqlite3
 
-SQLALCHEMY_DATABASE_URL = "sqlite:///E://sqlite//pets.db"
+import os
+# Use an environment variable for the database URL, falling back to a local SQLite file
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./pets.db")
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
